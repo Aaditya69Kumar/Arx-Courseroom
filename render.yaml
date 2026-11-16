@@ -1,0 +1,38 @@
+services:
+  - type: web
+    name: arx-courseroom-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate
+    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 3 --timeout 120
+    healthCheckPath: /api/v1/health/
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings.production
+      - key: DJANGO_DEBUG
+        value: "false"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_ALLOWED_HOSTS
+        value: arx-courseroom-api.onrender.com
+      - key: DJANGO_CORS_ALLOWED_ORIGINS
+        value: https://arx-courseroom-web.onrender.com
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        value: https://arx-courseroom-web.onrender.com,https://arx-courseroom-api.onrender.com
+      - key: DATABASE_URL
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+
+  - type: web
+    name: arx-courseroom-web
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start -- --hostname 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 22.22.0
+      - key: NEXT_PUBLIC_API_URL
+        value: https://arx-courseroom-api.onrender.com/api/v1

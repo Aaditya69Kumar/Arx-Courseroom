@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+db.sqlite3
+staticfiles/
+media/
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
